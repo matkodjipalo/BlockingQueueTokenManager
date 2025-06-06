@@ -8,7 +8,9 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
   private def isTokenValid(token: Token): UIO[Boolean] =
     Random.nextBoolean.flatMap { isValid =>
       Console
-        .printLine(s"[Validation] Token '${token.bearer}' is ${if (isValid) "valid" else "invalid"}")
+        .printLine(
+          s"[Validation] Token '${token.bearer}' is ${if (isValid) "valid" else "invalid"}"
+        )
         .as(isValid)
         .orDie
     }
@@ -42,44 +44,52 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
 
   // Storelogix "request client" worker
   private def makeStorelogixRequest(
-                                     requestName: String,
-                                     queue: Queue[Token],
-                                     semaphore: Semaphore
-                                   ): UIO[Unit] =
+      requestName: String,
+      queue: Queue[Token],
+      semaphore: Semaphore
+  ): UIO[Unit] =
     (for {
       _ <- semaphore.withPermit {
-        for {
-          token   <- queue.take
-          isValid <- isTokenValid(token)
-          _       <- if (!isValid)
-            for {
-              _      <- Console.printLine(s"[$requestName] Token is invalid. Will fetch a new one.")
-              newTok <- selectedFetch
-              _      <- queue.offer(newTok)
-            } yield ()
-          else
-            (
-              if (requestName == "askForStockUpdates")
-                Console
-                  .printLine(s"[$requestName] request failed with the token ${token.bearer}")
-                  .delay(1.second) *>
-                  ZIO.fail(new RuntimeException(s"[$requestName] request simulated failure"))
-              else
-                Console
-                  .printLine(s"[$requestName] request successfully finished with the token ${token.bearer}")
-                  .delay(1.second)
-              ).onExit {
-              case Exit.Success(_)     =>
-                queue.offer(token) *>
-                  Console.printLine(s"[$requestName] returned token to queue after success").orDie
-              case Exit.Failure(cause) =>
-                queue.offer(token) *>
-                  Console
-                    .printLine(s"[$requestName] returned token to queue after failure: ${cause.prettyPrint}")
-                    .orDie
-            }
-        } yield ()
-      }
+             for {
+               token   <- queue.take
+               isValid <- isTokenValid(token)
+               _       <-
+                 if (!isValid)
+                   for {
+                     _      <-
+                       Console.printLine(s"[$requestName] Token is invalid. Will fetch a new one.")
+                     newTok <- selectedFetch
+                     _      <- queue.offer(newTok)
+                   } yield ()
+                 else
+                   (
+                     if (requestName == "askForStockUpdates")
+                       Console
+                         .printLine(s"[$requestName] request failed with the token ${token.bearer}")
+                         .delay(1.second) *>
+                         ZIO.fail(new RuntimeException(s"[$requestName] request simulated failure"))
+                     else
+                       Console
+                         .printLine(
+                           s"[$requestName] request successfully finished with the token ${token.bearer}"
+                         )
+                         .delay(1.second)
+                   ).onExit {
+                     case Exit.Success(_)     =>
+                       queue.offer(token) *>
+                         Console
+                           .printLine(s"[$requestName] returned token to queue after success")
+                           .orDie
+                     case Exit.Failure(cause) =>
+                       queue.offer(token) *>
+                         Console
+                           .printLine(
+                             s"[$requestName] returned token to queue after failure: ${cause.prettyPrint}"
+                           )
+                           .orDie
+                   }
+             } yield ()
+           }
       _ <- makeStorelogixRequest(requestName, queue, semaphore)
     } yield ()).orDie
 
@@ -88,12 +98,12 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
       queue     <- Queue.bounded[Token](1)
       semaphore <- Semaphore.make(1)
       _         <- ZIO.foreachDiscard(
-        List("askForShipmentNotifications", "askForStockUpdates", "dispatchProducts")
-      )(name => makeStorelogixRequest(name, queue, semaphore).fork)
+                     List("askForShipmentNotifications", "askForStockUpdates", "dispatchProducts")
+                   )(name => makeStorelogixRequest(name, queue, semaphore).fork)
 
-      _         <- queue.offer(Token("initial-token")) *>
-        Console.printLine("[Queue] offered initial token").orDie
+      _ <- queue.offer(Token("initial-token")) *>
+             Console.printLine("[Queue] offered initial token").orDie
 
-      _         <- ZIO.sleep(30.seconds) // Run for a while
+      _ <- ZIO.sleep(30.seconds) // Run for a while
     } yield ()
 }
