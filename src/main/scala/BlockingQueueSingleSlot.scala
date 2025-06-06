@@ -29,7 +29,7 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
       .retry(Schedule.recurs(3) && Schedule.spaced(3500.millis))
       .orElse {
         Console
-          .printLine("[TokenService] Giving up after 10 attempts, using fallback")
+          .printLine("[TokenService] Giving up after 3 attempts, using fallback")
           .orDie
           .as(Token("fallback-token"))
       }
