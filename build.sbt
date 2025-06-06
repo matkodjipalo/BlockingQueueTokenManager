@@ -12,3 +12,6 @@ lazy val root = (project in file("."))
     ),
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
   )
+
+Compile / compile := (Compile / compile).dependsOn(Compile / scalafmtCheck).value
+Test / compile := (Test / compile).dependsOn(Test / scalafmtCheck).value
