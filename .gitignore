@@ -18,3 +18,4 @@ out/
 # Temporary files
 *.tmp
 *.swp
+/target/
