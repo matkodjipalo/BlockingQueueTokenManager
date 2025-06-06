@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/untitled.iml" filepath="$PROJECT_DIR$/.idea/modules/untitled.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/untitled.main.iml" filepath="$PROJECT_DIR$/.idea/modules/untitled.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/untitled.test.iml" filepath="$PROJECT_DIR$/.idea/modules/untitled.test.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/untitled.untitled-build.iml" filepath="$PROJECT_DIR$/.idea/modules/untitled.untitled-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.iml" filepath="$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.BlockingQueueTokenManager-build.iml" filepath="$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.BlockingQueueTokenManager-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.main.iml" filepath="$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.test.iml" filepath="$PROJECT_DIR$/.idea/modules/BlockingQueueTokenManager.test.iml" />
     </modules>
   </component>
 </project>

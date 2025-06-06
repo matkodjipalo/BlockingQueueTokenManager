@@ -5,7 +5,7 @@ ThisBuild / organizationName := "example"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "untitled",
+    name := "BlockingQueueTokenManager",
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % "2.1.11",
       "dev.zio" %% "zio-test" % "2.1.11" % Test

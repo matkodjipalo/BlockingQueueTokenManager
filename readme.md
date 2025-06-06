@@ -1,17 +1,26 @@
-# BlockingQueueSingleSlot
+# BlockingQueueTokenManager
 
-A Scala application built with ZIO that demonstrates the use of a bounded queue and semaphore to manage token-based requests.
+A Scala application built with ZIO that demonstrates the use of bounded queues and semaphores to manage token-based requests. The project includes two implementations: `BlockingQueueSingleSlot` and `BlockingQueueTokenPool`.
 
 ## Features
 
+### BlockingQueueSingleSlot
+- Manages a single token in a bounded queue.
 - Simulates token validation and fetching with retry and fallback mechanisms.
-- Implements a bounded queue to manage tokens.
 - Uses a semaphore to control access to shared resources.
 - Demonstrates ZIO's concurrency and error-handling capabilities.
 
+### BlockingQueueTokenPool
+- Manages a pool of tokens in a bounded queue.
+- Pre-populates the queue with multiple tokens.
+- Simulates token validation and fetching with retry and fallback mechanisms.
+- Uses a semaphore to control access to shared resources.
+- Demonstrates ZIO's concurrency and scalability.
+
 ## Project Structure
 
-- **`BlockingQueueSingleSlot`**: The main object containing the application logic.
+- **`BlockingQueueSingleSlot`**: Contains the logic for managing a single token.
+- **`BlockingQueueTokenPool`**: Contains the logic for managing a pool of tokens.
 - **Token Management**: Simulates token fetching, validation, and fallback mechanisms.
 - **Request Workers**: Simulates multiple workers making requests using tokens.
 
