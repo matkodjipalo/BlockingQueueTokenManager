@@ -29,7 +29,7 @@ object BlockingQueueTokenPool extends ZIOAppDefault {
 
   private def fetchNewTokenWithFallback: UIO[Token] =
     fetchNewToken
-      .retry(Schedule.recurs(10) && Schedule.spaced(3500.millis))
+      .retry(Schedule.recurs(3) && Schedule.spaced(3500.millis))
       .orElse {
         Console
           .printLine("[TokenService] Giving up after 10 attempts, using fallback")
