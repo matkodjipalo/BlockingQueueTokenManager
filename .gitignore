@@ -1,0 +1,20 @@
+# SBT and Scala
+target/
+project/target/
+project/project/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
