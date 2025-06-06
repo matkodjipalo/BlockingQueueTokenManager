@@ -34,5 +34,5 @@ A Scala application built with ZIO that demonstrates the use of bounded queues a
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/matkodjipalo/BlockingQueueTokenManager
+   cd BlockingQueueTokenManager
