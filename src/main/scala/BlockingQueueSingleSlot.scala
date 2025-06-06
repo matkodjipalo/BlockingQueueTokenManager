@@ -16,7 +16,7 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
 
   private def fetchNewToken: IO[Throwable, Token] =
     Random.nextBoolean.flatMap {
-      case true =>
+      case true  =>
         Random.nextUUID.map(uuid => Token(s"token-${uuid.toString.take(8)}")) <*
           Console.printLine(s"[TokenService] Acquired new token")
       case false =>
@@ -37,13 +37,13 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
   private val selectedFetch: UIO[Token] = fetchNewTokenWithFallback
 
   private def makeStorelogixRequest(
-                                     requestName: String,
-                                     queue: Queue[Token]
-                                   ): UIO[Unit] =
+      requestName: String,
+      queue: Queue[Token]
+  ): UIO[Unit] =
     (for {
       token   <- queue.take
       isValid <- isTokenValid(token)
-      _ <-
+      _       <-
         if (!isValid)
           for {
             _      <- Console.printLine(s"[$requestName] Token is invalid. Will fetch a new one.")
@@ -63,7 +63,7 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
                   s"[$requestName] request successfully finished with the token ${token.bearer}"
                 )
                 .delay(1.second)
-            ).onExit {
+          ).onExit {
             case Exit.Success(_)     =>
               queue.offer(token) *>
                 Console
@@ -77,18 +77,18 @@ object BlockingQueueSingleSlot extends ZIOAppDefault {
                   )
                   .orDie
           }
-      _ <- makeStorelogixRequest(requestName, queue)
+      _       <- makeStorelogixRequest(requestName, queue)
     } yield ()).orDie
 
   override def run: ZIO[Any, Nothing, Unit] =
     for {
       queue <- Queue.bounded[Token](1)
       _     <- ZIO.foreachDiscard(
-        List("askForShipmentNotifications", "askForStockUpdates", "dispatchProducts")
-      )(name => makeStorelogixRequest(name, queue).fork)
+                 List("askForShipmentNotifications", "askForStockUpdates", "dispatchProducts")
+               )(name => makeStorelogixRequest(name, queue).fork)
 
       _ <- queue.offer(Token("initial-token")) *>
-        Console.printLine("[Queue] offered initial token").orDie
+             Console.printLine("[Queue] offered initial token").orDie
 
       _ <- ZIO.sleep(30.seconds)
     } yield ()

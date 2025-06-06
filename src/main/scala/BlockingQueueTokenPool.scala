@@ -39,55 +39,49 @@ object BlockingQueueTokenPool extends ZIOAppDefault {
 
   private def makeStorelogixRequest(
       requestName: String,
-      queue: Queue[Token],
-      semaphore: Semaphore
+      queue: Queue[Token]
   ): UIO[Unit] =
     (for {
-      _ <- semaphore.withPermit {
-             for {
-               token   <- queue.take
-               isValid <- isTokenValid(token)
-               _       <-
-                 if (!isValid)
-                   for {
-                     _      <- Console.printLine(s"[$requestName] Token is invalid. Fetching new one.")
-                     newTok <- fetchNewTokenWithFallback
-                     _      <- queue.offer(newTok)
-                   } yield ()
-                 else
-                   (
-                     if (requestName == "askForStockUpdates")
-                       Console
-                         .printLine(s"[$requestName] request failed with token ${token.bearer}")
-                         .delay(1.second) *>
-                         ZIO.fail(new RuntimeException(s"[$requestName] simulated failure"))
-                     else
-                       Console
-                         .printLine(s"[$requestName] request succeeded with token ${token.bearer}")
-                         .delay(1.second)
-                   ).onExit {
-                     case Exit.Success(_)     =>
-                       queue.offer(token) *>
-                         Console
-                           .printLine(s"[$requestName] returned token to queue after success")
-                           .orDie
-                     case Exit.Failure(cause) =>
-                       queue.offer(token) *>
-                         Console
-                           .printLine(
-                             s"[$requestName] returned token to queue after failure: ${cause.prettyPrint}"
-                           )
-                           .orDie
-                   }
-             } yield ()
-           }
-      _ <- makeStorelogixRequest(requestName, queue, semaphore)
+      token   <- queue.take
+      isValid <- isTokenValid(token)
+      _       <-
+        if (!isValid)
+          for {
+            _      <- Console.printLine(s"[$requestName] Token is invalid. Fetching new one.")
+            newTok <- fetchNewTokenWithFallback
+            _      <- queue.offer(newTok)
+          } yield ()
+        else
+          (
+            if (requestName == "askForStockUpdates")
+              Console
+                .printLine(s"[$requestName] request failed with token ${token.bearer}")
+                .delay(1.second) *>
+                ZIO.fail(new RuntimeException(s"[$requestName] simulated failure"))
+            else
+              Console
+                .printLine(s"[$requestName] request succeeded with token ${token.bearer}")
+                .delay(1.second)
+          ).onExit {
+            case Exit.Success(_)     =>
+              queue.offer(token) *>
+                Console
+                  .printLine(s"[$requestName] returned token to queue after success")
+                  .orDie
+            case Exit.Failure(cause) =>
+              queue.offer(token) *>
+                Console
+                  .printLine(
+                    s"[$requestName] returned token to queue after failure: ${cause.prettyPrint}"
+                  )
+                  .orDie
+          }
+      _       <- makeStorelogixRequest(requestName, queue)
     } yield ()).orDie
 
   override def run: ZIO[Any, Nothing, Unit] =
     for {
-      queue     <- Queue.bounded[Token](poolSize)
-      semaphore <- Semaphore.make(poolSize.toLong)
+      queue <- Queue.bounded[Token](poolSize)
 
       // Pre-populate the pool with tokens
       _ <- ZIO.foreachDiscard(1 to poolSize) { i =>
@@ -98,7 +92,7 @@ object BlockingQueueTokenPool extends ZIOAppDefault {
 
       _ <- ZIO.foreachDiscard(
              List("askForShipmentNotifications", "askForStockUpdates", "dispatchProducts")
-           )(name => makeStorelogixRequest(name, queue, semaphore).fork)
+           )(name => makeStorelogixRequest(name, queue).fork)
 
       _ <- ZIO.sleep(30.seconds)
     } yield ()
